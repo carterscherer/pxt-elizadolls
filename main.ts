@@ -1,10 +1,63 @@
 //% color="#FE99F8"
 namespace ElizaDolls {
 
+    // In case it gets lost from above (// then %) 
+    //  % color="#FE99F8"
+
+    // For all LED functions
     // Packing into number:  ( r << 16 ) | (g << 8 ) | b
     // Sending to ws2812   ---b---g---r--->
     // Added some text to pxt.json to disable BT 
     // this helps with console output!
+
+    //% block="set accessories $leftEar | $rightEar | $necklace"
+    //% group="Accessories"
+    //% leftEar.shadow="colorNumberPicker"
+    //% rightEar.shadow="colorNumberPicker"
+    //% necklace.shadow="colorNumberPicker"
+    export function ledAccessories(leftEar: number, rightEar: number, necklace: number ) {
+        let e = pins.createBuffer(3 * 3)
+        let offset = 0;
+
+        // Left Ear
+
+        let rColor = (leftEar >> 16) & 0xFF;
+        let gColor = (leftEar >> 8) & 0xFF;
+        let bColor = (leftEar >> 0) & 0xFF;
+
+        e[offset + 0] = gColor;
+        e[offset + 1] = rColor;
+        e[offset + 2] = bColor;
+
+        // Right Ear
+
+        offset += 3;
+
+        rColor = (rightEar >> 16) & 0xFF;
+        gColor = (rightEar >> 8) & 0xFF;
+        bColor = (rightEar >> 0) & 0xFF;
+
+        e[offset + 0] = gColor;
+        e[offset + 1] = rColor;
+        e[offset + 2] = bColor;
+
+        // Necklace Ear
+
+        offset += 3;
+
+        rColor = (necklace >> 16) & 0xFF;
+        gColor = (necklace >> 8) & 0xFF;
+        bColor = (necklace >> 0) & 0xFF;
+
+        e[offset + 0] = gColor;
+        e[offset + 1] = rColor;
+        e[offset + 2] = bColor;
+
+        // Zip all the colors out
+
+        ws2812b.sendBuffer(e, DigitalPin.P16);
+    }
+
 
     //% block="set ring led $cv"
     //% group="Ring"
@@ -115,9 +168,9 @@ namespace ElizaDolls {
         let cMax = (rColor22 > gColor22) ? rColor22 : gColor22;
         cMax = (bColor22 > cMax) ? bColor22 : cMax;
 
-        rColor22 = 32 * rColor22 / cMax;
-        gColor22 = 32 * gColor22 / cMax;
-        bColor22 = 32 * bColor22 / cMax;
+        rColor22 = 16 * rColor22 / cMax;
+        gColor22 = 16 * gColor22 / cMax;
+        bColor22 = 16 * bColor22 / cMax;
 
         // basic.showNumber( rColor >> 4 );
 

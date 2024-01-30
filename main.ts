@@ -4,19 +4,62 @@ namespace ElizaDolls {
     // In case it gets lost from above (// then %) 
     //  % color="#FE99F8"
 
+    let pulseMinLocal = 1024;
+    let pulseMaxLocal = 0;
+    let pulseLocal = 0;
+    let pulseMotion = 0.001;
+
+    //% block="read pulse"
+    //% group="Pulse"
+    export function pulseSensor( ) : number {
+
+        pulseLocal = pins.analogReadPin( AnalogPin.P1 );
+
+        pulseMinLocal += ( 1024 - pulseMinLocal ) * pulseMotion;
+        if (pulseLocal < pulseMinLocal )
+            pulseMinLocal = pulseLocal;
+
+        pulseMaxLocal -= pulseMaxLocal * pulseMotion;
+        if (pulseLocal > pulseMaxLocal)
+            pulseMaxLocal = pulseLocal;
+
+        let range = pulseMaxLocal - pulseMinLocal;
+
+        let output = 0;
+
+        if ( range > 0 ) {
+            if ( ( pulseLocal - pulseMinLocal ) > 3 * range / 4 )
+                output = 1;
+        }
+
+        return output;
+    }
+
+    //% block="read pulse local"
+    //% group="Pulse"
+    export function pulseSensorLocal(): number { return pulseLocal; }
+
+    //% block="read pulse max"
+    //% group="Pulse"
+    export function pulseSensorRangeMax(): number { return pulseMaxLocal; }
+
+    //% block="read pulse min"
+    //% group="Pulse"
+    export function pulseSensorRangeMin(): number { return pulseMinLocal; }
+
     // For all LED functions
     // Packing into number:  ( r << 16 ) | (g << 8 ) | b
     // Sending to ws2812   ---b---g---r--->
     // Added some text to pxt.json to disable BT 
     // this helps with console output!
 
-    //% block="set accessories $leftEar | $rightEar | $necklace"
+    //% block="set Left Earring, Right Earring, Necklace $leftEar | $rightEar | $necklace"
     //% group="Accessories"
     //% leftEar.shadow="colorNumberPicker"
     //% rightEar.shadow="colorNumberPicker"
     //% necklace.shadow="colorNumberPicker"
     export function ledAccessories(leftEar: number, rightEar: number, necklace: number ) {
-        let e = pins.createBuffer(3 * 3)
+        let e = pins.createBuffer(13 * 3)
         let offset = 0;
 
         // Left Ear
@@ -41,18 +84,20 @@ namespace ElizaDolls {
         e[offset + 1] = rColor;
         e[offset + 2] = bColor;
 
-        // Necklace Ear
+        // Necklace
 
-        offset += 3;
+        for ( let i = 0; i < 11; i++ ) { 
+            offset += 3;
 
-        rColor = (necklace >> 16) & 0xFF;
-        gColor = (necklace >> 8) & 0xFF;
-        bColor = (necklace >> 0) & 0xFF;
+            rColor = (necklace >> 16) & 0xFF;
+            gColor = (necklace >> 8) & 0xFF;
+            bColor = (necklace >> 0) & 0xFF;
 
-        e[offset + 0] = gColor;
-        e[offset + 1] = rColor;
-        e[offset + 2] = bColor;
-
+            e[offset + 0] = gColor;
+            e[offset + 1] = rColor;
+            e[offset + 2] = bColor;
+        }
+        
         // Zip all the colors out
 
         ws2812b.sendBuffer(e, DigitalPin.P16);
@@ -63,19 +108,19 @@ namespace ElizaDolls {
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
     export function ringDirect(cv: number) {
-        let e = pins.createBuffer(25 * 3)
+        let f = pins.createBuffer(25 * 3)
 
-        let rColor = (cv >> 16) & 0xFF;
-        let gColor = (cv >> 8) & 0xFF;
-        let bColor = (cv >> 0) & 0xFF;
+        let rColor2 = (cv >> 16) & 0xFF;
+        let gColor2 = (cv >> 8) & 0xFF;
+        let bColor2 = (cv >> 0) & 0xFF;
 
         for (let j = 0; j < 25; j++) {
-            e[j * 3 + 0] = gColor;
-            e[j * 3 + 1] = rColor;
-            e[j * 3 + 2] = bColor;
+            f[j * 3 + 0] = gColor2;
+            f[j * 3 + 1] = rColor2;
+            f[j * 3 + 2] = bColor2;
         }
         // ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
-        ws2812b.sendBuffer(e, DigitalPin.P8);
+        ws2812b.sendBuffer(f, DigitalPin.P8);
     }
 
     //% block

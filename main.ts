@@ -9,9 +9,9 @@ namespace ElizaDolls {
     let pulseLocal = 0;
     let pulseMotion = 0.001;
 
-    //% block="read pulse"
+    //% block="read beat"
     //% group="Pulse"
-    export function pulseSensor( ) : number {
+    export function pulseSensorBeat( ) : boolean {
 
         pulseLocal = pins.analogReadPin( AnalogPin.P1 );
 
@@ -25,20 +25,41 @@ namespace ElizaDolls {
 
         let range = pulseMaxLocal - pulseMinLocal;
 
-        let output = 0;
+        let output = false;
 
         if ( range > 0 ) {
             if ( ( pulseLocal - pulseMinLocal ) > 3 * range / 4 )
-                output = 1;
+                output = true;
         }
 
         return output;
     }
 
-    //% block="read pulse local"
+    //% block="read pulse wave"
     //% group="Pulse"
-    export function pulseSensorLocal(): number { return pulseLocal; }
+    export function pulseSensorWave(): number { 
+        pulseLocal = pins.analogReadPin(AnalogPin.P1);
 
+        pulseMinLocal += (1024 - pulseMinLocal) * pulseMotion;
+        if (pulseLocal < pulseMinLocal)
+            pulseMinLocal = pulseLocal;
+
+        pulseMaxLocal -= pulseMaxLocal * pulseMotion;
+        if (pulseLocal > pulseMaxLocal)
+            pulseMaxLocal = pulseLocal;
+
+        let range = pulseMaxLocal - pulseMinLocal;
+
+        let output = 0;
+
+        if (range > 0) {
+            output = 1024 * (pulseLocal - pulseMinLocal) / range;
+        }
+
+        return output;    
+    }
+
+/*
     //% block="read pulse max"
     //% group="Pulse"
     export function pulseSensorRangeMax(): number { return pulseMaxLocal; }
@@ -46,6 +67,7 @@ namespace ElizaDolls {
     //% block="read pulse min"
     //% group="Pulse"
     export function pulseSensorRangeMin(): number { return pulseMinLocal; }
+*/
 
     // For all LED functions
     // Packing into number:  ( r << 16 ) | (g << 8 ) | b
@@ -98,6 +120,35 @@ namespace ElizaDolls {
             e[offset + 2] = bColor;
         }
         
+        // Zip all the colors out
+
+        ws2812b.sendBuffer(e, DigitalPin.P16);
+    }
+
+    //% block="set Accessory $accessory"
+    //% group="Accessories"
+    //% accessory.shadow="colorNumberPicker"
+    export function ledAccessory(accessory: number) {
+        let e = pins.createBuffer(12 * 3)
+        let offset = 0;
+
+        // Accessory
+        let rColor;
+        let gColor;
+        let bColor;
+
+        for (let i = 0; i < 12; i++) {
+            rColor = (accessory >> 16) & 0xFF;
+            gColor = (accessory >> 8) & 0xFF;
+            bColor = (accessory >> 0) & 0xFF;
+
+            e[offset + 0] = gColor;
+            e[offset + 1] = rColor;
+            e[offset + 2] = bColor;
+
+            offset += 3;
+        }
+
         // Zip all the colors out
 
         ws2812b.sendBuffer(e, DigitalPin.P16);
@@ -201,14 +252,15 @@ namespace ElizaDolls {
             bSense = i2cReadRegister16(colorSensorAddress, colorSensorBlueRegister);
         }
 
+        let punchup = 3;  // 2.5 worked for a while - too washed out?
 
         let rColor22 = (rSense >> 8) & 0xFF;
         let gColor22 = (gSense >> 8) & 0xFF;
         let bColor22 = (bSense >> 8) & 0xFF;
 
-        rColor22 = Math.pow(rColor22, 2.5);
-        gColor22 = Math.pow(gColor22, 2.5);
-        bColor22 = Math.pow(bColor22, 2.5);
+        rColor22 = Math.pow(rColor22, punchup );
+        gColor22 = Math.pow(gColor22, punchup );
+        bColor22 = Math.pow(bColor22, punchup );
 
         let cMax = (rColor22 > gColor22) ? rColor22 : gColor22;
         cMax = (bColor22 > cMax) ? bColor22 : cMax;
@@ -221,9 +273,6 @@ namespace ElizaDolls {
 
         return (rColor22 << 16) | (gColor22 << 8) | bColor22;
         // return (rSense << 16) | (gSense << 8) | bSense;
-
-
-        // return rSense + gSense + bSense;
 
     }
 
@@ -244,7 +293,6 @@ namespace ElizaDolls {
     export function colorGetBlue(color: number): number {
         return (color & 0xFF);
     }
-
 
     function colorSensorConfigure() {
         if (!colorSensorConfigured && checkColorSensor()) {

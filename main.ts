@@ -35,6 +35,23 @@ namespace ElizaDolls {
         return output;
     }
 
+    let pulseSensorBpmBeat = false;
+    let pulseSensorBpmRunningTime = 0;
+    let pulseSensorBpmStore = 0;
+
+    //% block="read pulse BPM"
+    //% group="Pulse"
+    export function pulseSensorBpm(): number {
+        let beat = pulseSensorBeat();
+        if ( beat && ( beat != pulseSensorBpmBeat ) ) {
+            let runningTime = input.runningTime();
+            pulseSensorBpmStore = 60000 / ( runningTime - pulseSensorBpmRunningTime );
+            pulseSensorBpmRunningTime = runningTime;
+        }
+        pulseSensorBpmBeat = beat;
+        return pulseSensorBpmStore;
+    }
+
     //% block="read pulse wave"
     //% group="Pulse"
     export function pulseSensorWave(): number { 
@@ -48,15 +65,15 @@ namespace ElizaDolls {
         if (pulseLocal > pulseMaxLocal)
             pulseMaxLocal = pulseLocal;
 
-        let range = pulseMaxLocal - pulseMinLocal;
+        let range2 = pulseMaxLocal - pulseMinLocal;
 
-        let output = 0;
+        let output2 = 0;
 
-        if (range > 0) {
-            output = 1024 * (pulseLocal - pulseMinLocal) / range;
+        if (range2 > 0) {
+            output2 = 1024 * (pulseLocal - pulseMinLocal) / range2;
         }
 
-        return output;    
+        return output2;    
     }
 
 /*
@@ -129,29 +146,29 @@ namespace ElizaDolls {
     //% group="Accessories"
     //% accessory.shadow="colorNumberPicker"
     export function ledAccessory(accessory: number) {
-        let e = pins.createBuffer(12 * 3)
-        let offset = 0;
+        let f = pins.createBuffer(12 * 3)
+        let offset2 = 0;
 
         // Accessory
-        let rColor;
-        let gColor;
-        let bColor;
+        let rColor2;
+        let gColor2;
+        let bColor2;
 
-        for (let i = 0; i < 12; i++) {
-            rColor = (accessory >> 16) & 0xFF;
-            gColor = (accessory >> 8) & 0xFF;
-            bColor = (accessory >> 0) & 0xFF;
+        for (let j = 0; j < 12; j++) {
+            rColor2 = (accessory >> 16) & 0xFF;
+            gColor2 = (accessory >> 8) & 0xFF;
+            bColor2 = (accessory >> 0) & 0xFF;
 
-            e[offset + 0] = gColor;
-            e[offset + 1] = rColor;
-            e[offset + 2] = bColor;
+            f[offset2 + 0] = gColor2;
+            f[offset2 + 1] = rColor2;
+            f[offset2 + 2] = bColor2;
 
-            offset += 3;
+            offset2 += 3;
         }
 
         // Zip all the colors out
 
-        ws2812b.sendBuffer(e, DigitalPin.P16);
+        ws2812b.sendBuffer(f, DigitalPin.P16);
     }
 
 
@@ -159,19 +176,19 @@ namespace ElizaDolls {
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
     export function ringDirect(cv: number) {
-        let f = pins.createBuffer(25 * 3)
+        let g = pins.createBuffer(25 * 3)
 
-        let rColor2 = (cv >> 16) & 0xFF;
-        let gColor2 = (cv >> 8) & 0xFF;
-        let bColor2 = (cv >> 0) & 0xFF;
+        let rColor22 = (cv >> 16) & 0xFF;
+        let gColor22 = (cv >> 8) & 0xFF;
+        let bColor22 = (cv >> 0) & 0xFF;
 
-        for (let j = 0; j < 25; j++) {
-            f[j * 3 + 0] = gColor2;
-            f[j * 3 + 1] = rColor2;
-            f[j * 3 + 2] = bColor2;
+        for (let k = 0; k < 25; k++) {
+            g[k * 3 + 0] = gColor22;
+            g[k * 3 + 1] = rColor22;
+            g[k * 3 + 2] = bColor22;
         }
         // ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
-        ws2812b.sendBuffer(f, DigitalPin.P8);
+        ws2812b.sendBuffer(g, DigitalPin.P8);
     }
 
     //% block
@@ -254,24 +271,24 @@ namespace ElizaDolls {
 
         let punchup = 3;  // 2.5 worked for a while - too washed out?
 
-        let rColor22 = (rSense >> 8) & 0xFF;
-        let gColor22 = (gSense >> 8) & 0xFF;
-        let bColor22 = (bSense >> 8) & 0xFF;
+        let rColor222 = (rSense >> 8) & 0xFF;
+        let gColor222 = (gSense >> 8) & 0xFF;
+        let bColor222 = (bSense >> 8) & 0xFF;
 
-        rColor22 = Math.pow(rColor22, punchup );
-        gColor22 = Math.pow(gColor22, punchup );
-        bColor22 = Math.pow(bColor22, punchup );
+        rColor222 = Math.pow(rColor222, punchup );
+        gColor222 = Math.pow(gColor222, punchup );
+        bColor222 = Math.pow(bColor222, punchup );
 
-        let cMax = (rColor22 > gColor22) ? rColor22 : gColor22;
-        cMax = (bColor22 > cMax) ? bColor22 : cMax;
+        let cMax = (rColor222 > gColor222) ? rColor222 : gColor222;
+        cMax = (bColor222 > cMax) ? bColor222 : cMax;
 
-        rColor22 = 16 * rColor22 / cMax;
-        gColor22 = 16 * gColor22 / cMax;
-        bColor22 = 16 * bColor22 / cMax;
+        rColor222 = 16 * rColor222 / cMax;
+        gColor222 = 16 * gColor222 / cMax;
+        bColor222 = 16 * bColor222 / cMax;
 
         // basic.showNumber( rColor >> 4 );
 
-        return (rColor22 << 16) | (gColor22 << 8) | bColor22;
+        return (rColor222 << 16) | (gColor222 << 8) | bColor222;
         // return (rSense << 16) | (gSense << 8) | bSense;
 
     }

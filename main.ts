@@ -211,7 +211,8 @@ namespace ElizaDolls {
         return Math.idiv(d, 58);
     }
 
-    // Soil Moisture Sensor 
+    //% block
+    //% group="Soil Moisture"
     export function soilMoisture(): number {
 
         // Read analog value from soil moisture sensor

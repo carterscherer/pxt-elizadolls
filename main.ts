@@ -211,6 +211,22 @@ namespace ElizaDolls {
         return Math.idiv(d, 58);
     }
 
+    // Soil Moisture Sensor 
+    export function soilMoisture(): number {
+
+        // Read analog value from soil moisture sensor
+        const moistureLevel = pins.analogReadPin(AnalogPin.P1);
+
+        // Map to a percentage (0-100%)
+        const minValue = 0;   // dry soil
+        const maxValue = 1023; // wet soil
+        const percentage = Math.map(moistureLevel, minValue, maxValue, 0, 100);
+
+        // Return percentage
+        return Math.constrain(percentage, 0, 100);
+    }
+
+
     // 
 
     let colorSensorConfigured: boolean = false;

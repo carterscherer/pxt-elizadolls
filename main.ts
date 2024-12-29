@@ -1,4 +1,3 @@
-//% color="#FE99F8"
 namespace ElizaDolls {
 
     // In case it gets lost from above (// then %) 
@@ -190,6 +189,29 @@ namespace ElizaDolls {
         // ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
         ws2812b.sendBuffer(g, DigitalPin.P8);
     }
+
+    //% block="rainblow ring $cv"
+    //% group="Ring"
+    //% cv.shadow="colorNumberPicker"
+    export function ringDirectRainbow() {
+        let g = pins.createBuffer(25 * 3); // 25 LEDs, each with 3 bytes (RGB)
+
+        for (let k = 0; k < 25; k++) {
+            // Generate random colors
+            let rColor = Math.randomRange(0, 255);
+            let gColor = Math.randomRange(0, 255);
+            let bColor = Math.randomRange(0, 255);
+
+            // Assign the colors to the buffer
+            g[k * 3 + 0] = gColor; // G
+            g[k * 3 + 1] = rColor; // R
+            g[k * 3 + 2] = bColor; // B
+        }
+
+        // Send the buffer to the LEDs
+        ws2812b.sendBuffer(g, DigitalPin.P8);
+    }
+
 
     //% block
     //% group="Distance"

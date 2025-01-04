@@ -190,7 +190,7 @@ namespace ElizaDolls {
         ws2812b.sendBuffer(g, DigitalPin.P8);
     }
 
-    //% block="rainbow ring $cv"
+    //% block="Rainbow Ring $cv"
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
     export function ringDirectRainbow() {

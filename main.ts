@@ -193,7 +193,7 @@ namespace ElizaDolls {
     //% block="rainbow ring $cv"
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
-    function ringDirectRainbow() {
+    export function ringDirectRainbow() {
         let g = pins.createBuffer(25 * 3); // 25 LEDs, each with 3 bytes (RGB)
 
         // Use static variables to store state between calls
@@ -254,7 +254,7 @@ namespace ElizaDolls {
     export function soilMoisture(): number {
 
         // Read analog value from soil moisture sensor
-        const moistureLevel = pins.analogReadPin(AnalogPin.P1);
+        const moistureLevel = pins.analogReadPin(AnalogPin.P2);
 
         // Map to a percentage (0-100%)
         const minValue = 0;   // dry soil

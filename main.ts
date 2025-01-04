@@ -193,23 +193,39 @@ namespace ElizaDolls {
     //% block="rainbow ring $cv"
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
-    export function ringDirectRainbow() {
+    function ringDirectRainbow() {
         let g = pins.createBuffer(25 * 3); // 25 LEDs, each with 3 bytes (RGB)
 
-        for (let k = 0; k < 25; k++) {
-            // Generate random colors
-            let rColor = Math.randomRange(0, 255);
-            let gColor = Math.randomRange(0, 255);
-            let bColor = Math.randomRange(0, 255);
+        // Use static variables to store state between calls
+        let staticLastUpdate = (() => {
+            let lastUpdate = input.runningTime(); // Initialize only once
+            return () => {
+                let current = lastUpdate;
+                lastUpdate = input.runningTime();
+                return current;
+            };
+        })();
 
-            // Assign the colors to the buffer
-            g[k * 3 + 0] = gColor; // G
-            g[k * 3 + 1] = rColor; // R
-            g[k * 3 + 2] = bColor; // B
+        let staticUpdateInterval = 100; // Update interval in milliseconds
+
+        // Check if enough time has passed
+        let lastUpdate = staticLastUpdate();
+        if (input.runningTime() - lastUpdate >= staticUpdateInterval) {
+            for (let k = 0; k < 25; k++) {
+                // Generate random colors
+                let rColor = Math.randomRange(0, 255);
+                let gColor = Math.randomRange(0, 255);
+                let bColor = Math.randomRange(0, 255);
+
+                // Assign the colors to the buffer
+                g[k * 3 + 0] = gColor; // G
+                g[k * 3 + 1] = rColor; // R
+                g[k * 3 + 2] = bColor; // B
+            }
+
+            // Send the buffer to the LEDs
+            ws2812b.sendBuffer(g, DigitalPin.P8);
         }
-
-        // Send the buffer to the LEDs
-        ws2812b.sendBuffer(g, DigitalPin.P8);
     }
 
 
@@ -247,6 +263,7 @@ namespace ElizaDolls {
 
         // Return percentage
         return Math.constrain(percentage, 0, 100);
+        return moistureLevel
     }
 
 

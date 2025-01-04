@@ -190,32 +190,18 @@ namespace ElizaDolls {
         ws2812b.sendBuffer(g, DigitalPin.P8);
     }
 
-    //% block="Rainbow Ring $cv"
+    //% block="Animated Rainbow Ring $cv"
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
     export function ringDirectRainbow() {
         let g = pins.createBuffer(25 * 3); // 25 LEDs, each with 3 bytes (RGB)
 
-        // Use static variables to store state between calls
-        let staticLastUpdate = (() => {
-            let lastUpdate = input.runningTime(); // Initialize only once
-            return () => {
-                let current = lastUpdate;
-                lastUpdate = input.runningTime();
-                return current;
-            };
-        })();
-
-        let staticUpdateInterval = 100; // Update interval in milliseconds
-
-        // Check if enough time has passed
-        let lastUpdate = staticLastUpdate();
-        if (input.runningTime() - lastUpdate >= staticUpdateInterval) {
+        for (let i = 0; i < 255; i++) {
             for (let k = 0; k < 25; k++) {
-                // Generate random colors
-                let rColor = Math.randomRange(0, 255);
-                let gColor = Math.randomRange(0, 255);
-                let bColor = Math.randomRange(0, 255);
+                // Create a wave effect by varying the colors across the LEDs
+                let rColor = (i + k * 10) % 255; // Red shifts slightly per LED
+                let gColor = (i + k * 20) % 255; // Green shifts faster
+                let bColor = (i + k * 30) % 255; // Blue shifts even faster
 
                 // Assign the colors to the buffer
                 g[k * 3 + 0] = gColor; // G
@@ -225,8 +211,12 @@ namespace ElizaDolls {
 
             // Send the buffer to the LEDs
             ws2812b.sendBuffer(g, DigitalPin.P8);
+
+            // Simple delay to slow down the animation
+            basic.pause(50); // Adjust the pause duration to change speed
         }
     }
+
 
 
     //% block
@@ -252,18 +242,11 @@ namespace ElizaDolls {
     //% block
     //% group="Soil Moisture"
     export function soilMoisture(): number {
-
         // Read analog value from soil moisture sensor
-        const moistureLevel = pins.analogReadPin(AnalogPin.P2);
+        const moistureLevel = pins.analogReadPin(AnalogPin.P1);
 
-        // Map to a percentage (0-100%)
-        const minValue = 0;   // dry soil
-        const maxValue = 1023; // wet soil
-        const percentage = Math.map(moistureLevel, minValue, maxValue, 0, 100);
-
-        // Return percentage
-        return Math.constrain(percentage, 0, 100);
-        return moistureLevel
+        // Return the raw analog value
+        return moistureLevel;
     }
 
 

@@ -199,9 +199,9 @@ namespace ElizaDolls {
         for (let i = 0; i < 255; i++) {
             for (let k = 0; k < 25; k++) {
                 // Create a wave effect by varying the colors across the LEDs
-                let rColor = (i + k * 10) % 125; // Red shifts slightly per LED
-                let gColor = (i + k * 20) % 125; // Green shifts faster
-                let bColor = (i + k * 30) % 125; // Blue shifts even faster
+                let rColor = (i + k * 10) % 50; // Red shifts slightly per LED
+                let gColor = (i + k * 20) % 50; // Green shifts faster
+                let bColor = (i + k * 30) % 50; // Blue shifts even faster
 
                 // Assign the colors to the buffer
                 g[k * 3 + 0] = gColor; // G

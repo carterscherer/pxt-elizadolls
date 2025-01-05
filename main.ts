@@ -243,7 +243,7 @@ namespace ElizaDolls {
     //% group="Soil Moisture"
     export function soilMoisture(): number {
         // Read analog value from soil moisture sensor
-        const moistureLevel = pins.analogReadPin(AnalogPin.P1);
+        const moistureLevel = DigitalPin.P1; //pins.analogReadPin(AnalogPin.P1);
 
         // Return the raw analog value
         return moistureLevel;

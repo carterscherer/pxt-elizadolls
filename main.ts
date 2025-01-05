@@ -213,7 +213,7 @@ namespace ElizaDolls {
             ws2812b.sendBuffer(g, DigitalPin.P8);
 
             // Simple delay to slow down the animation
-            basic.pause(50); // Adjust the pause duration to change speed
+            basic.pause(100); // Adjust the pause duration to change speed
         }
     }
 
@@ -240,12 +240,11 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Soil Moisture"
+    //% group="Soil Moisture Level"
     export function soilMoisture(): number {
-        // Read analog value from soil moisture sensor
-        const moistureLevel = DigitalPin.P1; //pins.analogReadPin(AnalogPin.P1);
+        const moistureLevel = pins.digitalReadPin(DigitalPin.P1);
+        //const moistureLevel = DigitalPin.P1; //pins.analogReadPin(AnalogPin.P1);
 
-        // Return the raw analog value
         return moistureLevel;
     }
 

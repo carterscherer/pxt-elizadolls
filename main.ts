@@ -240,10 +240,10 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Soil Moisture Level"
+    //% group="Analog Soil Moisture"
     export function soilMoisture(): number {
         // Read the analog value from the soil moisture sensor on AnalogPin.P1
-        const moistureLevel = pins.analogReadPin(AnalogPin.P1);
+        const moistureLevel = pins.analogReadPin(AnalogPin.P0);
 
         // Optionally, you can map the moisture level to a percentage (0-100%)
         const minValue = 0;   // Adjust this based on your sensor's calibration for dry soil
@@ -253,6 +253,22 @@ namespace ElizaDolls {
         // Return the moisture percentage
         return Math.constrain(percentage, 0, 100);
     }
+
+    // //% block
+    // //% group="Digital Soil Moisture"
+    // export function soilMoistureDigital(): number {
+    //     // Read the analog value from the soil moisture sensor on AnalogPin.P1
+    //     const moistureLevel = pins.digitalReadPin(DigitalPin.P1);
+    //     const moistureLevelTwo = pins.digitalReadPin(DigitalPin.P2);
+
+    //     // Optionally, you can map the moisture level to a percentage (0-100%)
+    //     const minValue = 0;   // Adjust this based on your sensor's calibration for dry soil
+    //     const maxValue = 1023; // Adjust this based on your sensor's calibration for wet soil
+    //     const percentage = Math.map(moistureLevel, minValue, maxValue, 0, 100);
+
+    //     // Return the moisture percentage
+    //     return Math.constrain(percentage, 0, 100);
+    // }
 
 
     // 

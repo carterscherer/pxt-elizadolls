@@ -220,7 +220,7 @@ namespace ElizaDolls {
 
 
     //% block
-    //% group="Distance"
+    //% group="Distance Sensor"
     export function distance(): number {
         let trig = DigitalPin.P1;
         let echo = DigitalPin.P2;
@@ -242,10 +242,16 @@ namespace ElizaDolls {
     //% block
     //% group="Soil Moisture Level"
     export function soilMoisture(): number {
-        const moistureLevel = pins.digitalReadPin(DigitalPin.P1);
-        //const moistureLevel = DigitalPin.P1; //pins.analogReadPin(AnalogPin.P1);
+        // Read the analog value from the soil moisture sensor on AnalogPin.P1
+        const moistureLevel = pins.analogReadPin(AnalogPin.P1);
 
-        return moistureLevel;
+        // Optionally, you can map the moisture level to a percentage (0-100%)
+        const minValue = 0;   // Adjust this based on your sensor's calibration for dry soil
+        const maxValue = 1023; // Adjust this based on your sensor's calibration for wet soil
+        const percentage = Math.map(moistureLevel, minValue, maxValue, 0, 100);
+
+        // Return the moisture percentage
+        return Math.constrain(percentage, 0, 100);
     }
 
 

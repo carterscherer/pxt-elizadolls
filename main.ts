@@ -248,7 +248,7 @@ namespace ElizaDolls {
         let moistureLevel: number = 0;
 
         // Read the 16-bit moisture value from the sensor
-        moistureLevel = i2cReadRegister16(SOIL_SENSOR_ADDRESS, SOIL_SENSOR_REGISTER);
+        moistureLevel = i2cReadRegister8(SOIL_SENSOR_ADDRESS, SOIL_SENSOR_REGISTER);
 
         // Add a small delay to prevent excessive I2C reads
         pause(250); // Delay for 250ms
@@ -439,6 +439,8 @@ namespace ElizaDolls {
         )
         return pins.i2cReadNumber(address, NumberFormat.UInt16LE, false)
     }
+
+
 
     export function i2cWriteRegister8_8(address: number, register: number, value: number) {
         pins.i2cWriteNumber(

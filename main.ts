@@ -240,7 +240,7 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Carrot Soil Sensor"
+    //% group="CARROT Soil Sensor"
     export function soilMoistureRead(): number {
         const SOIL_SENSOR_ADDRESS = 0x36; // Default I2C address for the STEMMA Soil Sensor
         const SOIL_SENSOR_REGISTER = 0x0F; // Register for reading moisture
@@ -249,6 +249,9 @@ namespace ElizaDolls {
 
         // Read the 16-bit moisture value from the sensor
         moistureLevel = i2cReadRegister16(SOIL_SENSOR_ADDRESS, SOIL_SENSOR_REGISTER);
+
+        // Add a small delay to prevent excessive I2C reads
+        pause(250); // Delay for 250ms
 
         return moistureLevel;
     }

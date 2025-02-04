@@ -239,6 +239,20 @@ namespace ElizaDolls {
         return Math.idiv(d, 58);
     }
 
+    //% block
+    //% group="Carrot Soil Sensor"
+    export function soilMoistureRead(): number {
+        const SOIL_SENSOR_ADDRESS = 0x36; // Default I2C address for the STEMMA Soil Sensor
+        const SOIL_SENSOR_REGISTER = 0x0F; // Register for reading moisture
+
+        let moistureLevel: number = 0;
+
+        // Read the 16-bit moisture value from the sensor
+        moistureLevel = i2cReadRegister16(SOIL_SENSOR_ADDRESS, SOIL_SENSOR_REGISTER);
+
+        return moistureLevel;
+    }
+
 
     //% block
     //% group="A0 Soil Moisture"

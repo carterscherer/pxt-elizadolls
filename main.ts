@@ -240,21 +240,32 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="CARROT Soil Sensor"
+    //% group="Carrot Soil Sensor"
     export function soilMoistureRead(): number {
         const SOIL_SENSOR_ADDRESS = 0x36; // Default I2C address for the STEMMA Soil Sensor
-        const SOIL_SENSOR_REGISTER = 0x0F; // Register for reading moisture
+        const TOUCH_BASE = 0x0F; // Base register for moisture
+        const TOUCH_OFFSET = 0x10; // Offset for moisture reading
 
-        let moistureLevel: number = 0;
+        let buffer = pins.createBuffer(2);
 
-        // Read the 16-bit moisture value from the sensor
-        moistureLevel = i2cReadRegister8(SOIL_SENSOR_ADDRESS, SOIL_SENSOR_REGISTER);
+        // Write command to the sensor
+        buffer[0] = TOUCH_BASE;
+        buffer[1] = TOUCH_OFFSET;
+        pins.i2cWriteBuffer(SOIL_SENSOR_ADDRESS, buffer, false);
 
-        // Add a small delay to prevent excessive I2C reads
-        pause(250); // Delay for 250ms
+        // Small delay before reading
+        pause(5);
+
+        // Read moisture level (16-bit value)
+        buffer = pins.i2cReadBuffer(SOIL_SENSOR_ADDRESS, 2, false);
+        let moistureLevel = (buffer[0] << 8) | buffer[1]; // Convert to 16-bit integer
+
+        // Additional delay to prevent excessive I2C reads
+        pause(250);
 
         return moistureLevel;
     }
+
 
 
     //% block

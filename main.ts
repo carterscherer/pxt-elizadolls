@@ -281,7 +281,7 @@ namespace ElizaDolls {
             pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, buffer, false);
             pause(5); // Small delay before reading
             buffer = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
-            return (buffer[0] | (buffer[1] << 8)); // Convert to 16-bit value
+            return ((buffer[1] << 8) | buffer[0]); // Fix byte order
         }
 
         let red = readRegister(RED_REG);
@@ -294,25 +294,28 @@ namespace ElizaDolls {
         return { red, green, blue, white };
     }
 
+    // scale 16-bit to 8-bit
+    function scaleColor(value: number): number {
+        return Math.map(value, 0, 65535, 0, 255);
+    }
+
     //% block
-    //% group="Light Ring To Color Flower
+    //% group="Light Ring To Color Flower"
     export function setRingNewSensorColor() {
-        // Read color data from the sensor
         let color = newColorSensor();
 
-        // Create a buffer for 25 LEDs (3 bytes per LED)
         let g = pins.createBuffer(25 * 3);
 
         for (let k = 0; k < 25; k++) {
-            // Assign the sensor's color to all LEDs
-            g[k * 3 + 0] = color.green; // Green
-            g[k * 3 + 1] = color.red;   // Red
-            g[k * 3 + 2] = color.blue;  // Blue
+            g[k * 3 + 0] = scaleColor(color.green); // Green
+            g[k * 3 + 1] = scaleColor(color.red);   // Red
+            g[k * 3 + 2] = scaleColor(color.blue);  // Blue
         }
 
-        // Send the buffer to the LED ring
+        basic.pause(50); // Prevent timing issues
         ws2812b.sendBuffer(g, DigitalPin.P8);
     }
+
 
 
     //% block

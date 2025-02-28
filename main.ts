@@ -194,23 +194,23 @@ namespace ElizaDolls {
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
     export function ringDirectRainbow() {
-        let g = pins.createBuffer(25 * 3); // 25 LEDs, each with 3 bytes (RGB)
+        let h = pins.createBuffer(25 * 3); // 25 LEDs, each with 3 bytes (RGB)
 
-        for (let i = 0; i < 255; i++) {
-            for (let k = 0; k < 25; k++) {
+        for (let l = 0; l < 255; l++) {
+            for (let m = 0; m < 25; m++) {
                 // Create a wave effect by varying the colors across the LEDs
-                let rColor = (i + k * 10) % 50; // Red shifts slightly per LED
-                let gColor = (i + k * 20) % 50; // Green shifts faster
-                let bColor = (i + k * 30) % 50; // Blue shifts even faster
+                let rColor3 = (l + m * 10) % 50; // Red shifts slightly per LED
+                let gColor3 = (l + m * 20) % 50; // Green shifts faster
+                let bColor3 = (l + m * 30) % 50; // Blue shifts even faster
 
                 // Assign the colors to the buffer
-                g[k * 3 + 0] = gColor; // G
-                g[k * 3 + 1] = rColor; // R
-                g[k * 3 + 2] = bColor; // B
+                h[m * 3 + 0] = gColor3; // G
+                h[m * 3 + 1] = rColor3; // R
+                h[m * 3 + 2] = bColor3; // B
             }
 
             // Send the buffer to the LEDs
-            ws2812b.sendBuffer(g, DigitalPin.P8);
+            ws2812b.sendBuffer(h, DigitalPin.P8);
 
             // Simple delay to slow down the animation
             basic.pause(100); // Adjust the pause duration to change speed
@@ -276,12 +276,12 @@ namespace ElizaDolls {
         const WHITE_REG = 0x0B; // Register for white 
 
         function readRegister(register: number): number {
-            let buffer = pins.createBuffer(1);
-            buffer[0] = register;
-            pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, buffer, false);
+            let buffer2 = pins.createBuffer(1);
+            buffer2[0] = register;
+            pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, buffer2, false);
             pause(5); // Small delay before reading
-            buffer = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
-            return ((buffer[1] << 8) | buffer[0]); // Fix byte order
+            buffer2 = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
+            return ((buffer2[1] << 8) | buffer2[0]); // Fix byte order
         }
 
         let red = readRegister(RED_REG);
@@ -304,16 +304,16 @@ namespace ElizaDolls {
     export function setRingFlowerColor() {
         let color = newColorSensor();
 
-        let g = pins.createBuffer(25 * 3);
+        let n = pins.createBuffer(25 * 3);
 
-        for (let k = 0; k < 25; k++) {
-            g[k * 3 + 0] = scaleColor(color.green); // Green
-            g[k * 3 + 1] = scaleColor(color.red);   // Red
-            g[k * 3 + 2] = scaleColor(color.blue);  // Blue
+        for (let o = 0; o < 25; o++) {
+            n[o * 3 + 0] = scaleColor(color.green); // Green
+            n[o * 3 + 1] = scaleColor(color.red);   // Red
+            n[o * 3 + 2] = scaleColor(color.blue);  // Blue
         }
 
-        basic.pause(50); // Prevent timing issues
-        ws2812b.sendBuffer(g, DigitalPin.P8);
+        basic.pause(50); 
+        ws2812b.sendBuffer(n, DigitalPin.P8);
     }
 
 

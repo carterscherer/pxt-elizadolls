@@ -267,21 +267,31 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Read Color Flower"
+    //% group="Read The Color Flower"
     export function newColorSensor(): { red: number; green: number; blue: number; white: number } {
         const COLOR_SENSOR_ADDRESS = 0x10; // I2C address for VEML6040
+        const CONFIG_REG = 0x00; // Configuration register
         const RED_REG = 0x08; // Register for red 
         const GREEN_REG = 0x09; // Register for green 
         const BLUE_REG = 0x0A; // Register for blue 
         const WHITE_REG = 0x0B; // Register for white 
 
+        // Configure VEML6040: Power on, 80ms integration, 1x gain
+        let configBuffer = pins.createBuffer(3);
+        configBuffer[0] = CONFIG_REG; // Register address
+        configBuffer[1] = 0x00;      // High byte (no trigger)
+        configBuffer[2] = 0x01;      // Low byte: Power on, IT=80ms, Gain=1x
+        pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, configBuffer, false);
+        basic.pause(10); // Allow sensor initialization
+
         function readRegister(register: number): number {
             let buffer2 = pins.createBuffer(1);
             buffer2[0] = register;
             pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, buffer2, false);
-            pause(5); // Small delay before reading
+            basic.pause(5); // Small delay before reading
             buffer2 = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
-            return ((buffer2[1] << 8) | buffer2[0]); // Fix byte order
+            // Correct byte order: MSB first (buffer[0] << 8) | buffer[1]
+            return (buffer2[0] << 8) | buffer2[1];
         }
 
         let red = readRegister(RED_REG);
@@ -289,14 +299,15 @@ namespace ElizaDolls {
         let blue = readRegister(BLUE_REG);
         let white = readRegister(WHITE_REG);
 
-        pause(250);
+        basic.pause(50); // Short delay between readings
 
         return { red, green, blue, white };
     }
 
-    // scale 16-bit to 8-bit
+    // scale 16-bit to 8-bit (now uses actual sensor range)
     function scaleColor(value: number): number {
-        return Math.map(value, 0, 65535, 0, 255);
+        // VEML6040 max value varies by integration time/gain (here 80ms/1x → 32767 max)
+        return Math.map(value, 0, 32767, 0, 255);
     }
 
     //% block
@@ -312,7 +323,7 @@ namespace ElizaDolls {
             n[o * 3 + 2] = scaleColor(color.blue);  // Blue
         }
 
-        basic.pause(50); 
+        basic.pause(50);
         ws2812b.sendBuffer(n, DigitalPin.P8);
     }
 

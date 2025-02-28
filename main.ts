@@ -266,6 +266,34 @@ namespace ElizaDolls {
         return moistureLevel;
     }
 
+    //% block
+    //% group="New Color Sensor"
+    export function newColorSensor(): { red: number; green: number; blue: number; white: number } {
+        const COLOR_SENSOR_ADDRESS = 0x10; // I2C address for VEML6040
+        const RED_REG = 0x08; // Register for red 
+        const GREEN_REG = 0x09; // Register for green 
+        const BLUE_REG = 0x0A; // Register for blue 
+        const WHITE_REG = 0x0B; // Register for white 
+
+        function readRegister(register: number): number {
+            let buffer = pins.createBuffer(1);
+            buffer[0] = register;
+            pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, buffer, false);
+            pause(5); // Small delay before reading
+            buffer = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
+            return (buffer[0] | (buffer[1] << 8)); // Convert to 16-bit value
+        }
+
+        let red = readRegister(RED_REG);
+        let green = readRegister(GREEN_REG);
+        let blue = readRegister(BLUE_REG);
+        let white = readRegister(WHITE_REG);
+
+        pause(250);
+
+        return { red, green, blue, white };
+    }
+
 
 
     //% block
@@ -279,9 +307,8 @@ namespace ElizaDolls {
     }
 
 
-        // // Optionally, you can map the moisture level to a percentage (0-100%)
-        // const minValue = 0;   // Adjust this based on your sensor's calibration for dry soil
-        // const maxValue = 1023; // Adjust this based on your sensor's calibration for wet soil
+        // const minValue = 0;   
+        // const maxValue = 1023; 
         // const percentage = Math.map(moistureLevel, minValue, maxValue, 0, 100);
 
         // // Return the moisture percentage

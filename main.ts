@@ -304,12 +304,17 @@ namespace ElizaDolls {
         return { red, green, blue, white };
     }
 
-    // scale 16-bit to 8-bit (now uses actual sensor range)
+    // Add this brightness constant at the top of your namespace
+    const LED_BRIGHTNESS = 0.3; // Adjust this between 0.1 (dim) and 1.0 (full brightness)
+
+    // Modified scaleColor function with brightness control
     function scaleColor(value: number): number {
-        // VEML6040 max value varies by integration time/gain (here 80ms/1x → 32767 max)
-        return Math.map(value, 0, 32767, 0, 255);
+        // First scale to 0-255, then apply brightness reduction
+        let scaled = Math.map(value, 0, 32767, 0, 255);
+        return Math.round(scaled * LED_BRIGHTNESS);
     }
 
+    // Existing setRingFlowerColor function remains the same
     //% block
     //% group="Set Ring To Color Flower"
     export function setRingFlowerColor() {
@@ -326,8 +331,6 @@ namespace ElizaDolls {
         basic.pause(50);
         ws2812b.sendBuffer(n, DigitalPin.P8);
     }
-
-
 
     //% block
     //% group="A0 Soil Moisture"

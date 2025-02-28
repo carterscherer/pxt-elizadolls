@@ -220,7 +220,7 @@ namespace ElizaDolls {
 
 
     //% block
-    //% group="Distance Sensor"
+    //% group="Distance Read Bear"
     export function distance(): number {
         let trig = DigitalPin.P1;
         let echo = DigitalPin.P2;
@@ -240,7 +240,7 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Carrot Soil Sensor"
+    //% group="Plant Happiness Carrot"
     export function soilMoistureRead(): number {
         const SOIL_SENSOR_ADDRESS = 0x36; // Default I2C address for the STEMMA Soil Sensor
         const TOUCH_BASE = 0x0F; // Base register for moisture
@@ -267,7 +267,7 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="New Color Sensor"
+    //% group="Read Color Flower"
     export function newColorSensor(): { red: number; green: number; blue: number; white: number } {
         const COLOR_SENSOR_ADDRESS = 0x10; // I2C address for VEML6040
         const RED_REG = 0x08; // Register for red 
@@ -294,17 +294,36 @@ namespace ElizaDolls {
         return { red, green, blue, white };
     }
 
+    //% block
+    //% group="Light Ring To Color Flower
+    export function setRingNewSensorColor() {
+        // Read color data from the sensor
+        let color = newColorSensor();
+
+        // Create a buffer for 25 LEDs (3 bytes per LED)
+        let g = pins.createBuffer(25 * 3);
+
+        for (let k = 0; k < 25; k++) {
+            // Assign the sensor's color to all LEDs
+            g[k * 3 + 0] = color.green; // Green
+            g[k * 3 + 1] = color.red;   // Red
+            g[k * 3 + 2] = color.blue;  // Blue
+        }
+
+        // Send the buffer to the LED ring
+        ws2812b.sendBuffer(g, DigitalPin.P8);
+    }
 
 
     //% block
     //% group="A0 Soil Moisture"
-    export function soilMoisture(): number {
-        let moistureLevel: number = 0;
-        // Read the analog value from the soil moisture sensor on AnalogPin.P0
-        moistureLevel = pins.analogReadPin(AnalogPin.P0);
+    // export function soilMoisture(): number {
+    //     let moistureLevel: number = 0;
+    //     // Read the analog value from the soil moisture sensor on AnalogPin.P0
+    //     moistureLevel = pins.analogReadPin(AnalogPin.P0);
 
-        return moistureLevel; // Return the current moisture level
-    }
+    //     return moistureLevel; // Return the current moisture level
+    // }
 
 
         // const minValue = 0;   

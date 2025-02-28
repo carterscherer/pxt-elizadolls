@@ -300,8 +300,8 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Light Ring To Color Flower"
-    export function setRingNewSensorColor() {
+    //% group="Set Ring To Color Flower"
+    export function setRingFlowerColor() {
         let color = newColorSensor();
 
         let g = pins.createBuffer(25 * 3);

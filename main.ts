@@ -304,31 +304,34 @@ namespace ElizaDolls {
         return { red, green, blue, white };
     }
 
-    // Add this brightness constant at the top of your namespace
-    const LED_BRIGHTNESS = 0.3; // Adjust this between 0.1 (dim) and 1.0 (full brightness)
+    // Update the LED_BRIGHTNESS if needed (now correctly scaled)
+    const LED_BRIGHTNESS = 0.3; // Now effective due to correct scaling
 
-    // Modified scaleColor function with brightness control
+    // Corrected scaleColor function with proper sensor range and optional gamma
     function scaleColor(value: number): number {
-        // First scale to 0-255, then apply brightness reduction
-        let scaled = Math.map(value, 0, 32767, 0, 255);
-        return Math.round(scaled * LED_BRIGHTNESS);
+        // Map 16-bit sensor value (0-65535) to 0-255, then apply brightness
+        let scaled = Math.map(value, 0, 65535, 0, 255);
+        scaled = Math.round(scaled * LED_BRIGHTNESS);
+        // Optional gamma correction (uncomment if needed)
+        // scaled = Math.pow(scaled / 255, 2.8) * 255;
+        return Math.round(scaled);
     }
 
     // Existing setRingFlowerColor function remains the same
     //% block
     //% group="Set Ring To Color Flower"
     export function setRingFlowerColor() {
-        let color = newColorSensor();
+        let color = newColorSensor(); // Ensure sensor config is corrected too
 
         let n = pins.createBuffer(25 * 3);
 
         for (let o = 0; o < 25; o++) {
+            // GRB order for standard NeoPixels/WS2812B/SK6812RGB
             n[o * 3 + 0] = scaleColor(color.green); // Green
             n[o * 3 + 1] = scaleColor(color.red);   // Red
             n[o * 3 + 2] = scaleColor(color.blue);  // Blue
         }
 
-        basic.pause(50);
         ws2812b.sendBuffer(n, DigitalPin.P8);
     }
 

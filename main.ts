@@ -317,7 +317,6 @@ namespace ElizaDolls {
         return Math.round(scaled);
     }
 
-    // Existing setRingFlowerColor function remains the same
     //% block
     //% group="Set Ring To Color Flower"
     export function setRingFlowerColor() {

@@ -267,7 +267,7 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Read The Color Flower"
+    //% group="Read - Color Flower"
     export function newColorSensor(): { red: number; green: number; blue: number; white: number } {
         const COLOR_SENSOR_ADDRESS = 0x10; // I2C address for VEML6040
         const CONFIG_REG = 0x00; // Configuration register
@@ -318,22 +318,40 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Set Ring To Color Flower"
+    //% group="Set Ring - Color Flower"
     export function setRingFlowerColor() {
-        let color = newColorSensor(); // Ensure sensor config is corrected too
+        let color = newColorSensor();
 
+        // Scale colors first with brightness control
+        let r = scaleColor(color.red);
+        let g = scaleColor(color.green);
+        let b = scaleColor(color.blue);
+
+        // Find dominant color using nested Math.max for 3 values
+        const max = Math.max(Math.max(r, g), b);
+        const DOMINANCE_FACTOR = 0.25;
+
+        if (max === r) {              // Red is dominant
+            g = Math.round(g * DOMINANCE_FACTOR);
+            b = Math.round(b * DOMINANCE_FACTOR);
+        } else if (max === g) {       // Green is dominant
+            r = Math.round(r * DOMINANCE_FACTOR);
+            b = Math.round(b * DOMINANCE_FACTOR);
+        } else {                      // Blue is dominant
+            r = Math.round(r * DOMINANCE_FACTOR);
+            g = Math.round(g * DOMINANCE_FACTOR);
+        }
+
+        // Create buffer with emphasized colors
         let n = pins.createBuffer(25 * 3);
-
         for (let o = 0; o < 25; o++) {
-            // GRB order for standard NeoPixels/WS2812B/SK6812RGB
-            n[o * 3 + 0] = scaleColor(color.green); // Green
-            n[o * 3 + 1] = scaleColor(color.red);   // Red
-            n[o * 3 + 2] = scaleColor(color.blue);  // Blue
+            n[o * 3 + 0] = g;  // Green channel
+            n[o * 3 + 1] = r;  // Red channel
+            n[o * 3 + 2] = b;  // Blue channel
         }
 
         ws2812b.sendBuffer(n, DigitalPin.P8);
     }
-
     //% block
     //% group="A0 Soil Moisture"
     // export function soilMoisture(): number {

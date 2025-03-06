@@ -328,10 +328,9 @@ namespace ElizaDolls {
     const MIN_COLOR_THRESHOLD = 5; // Ignore values below this to avoid noise
 
 
-
     // Enhanced setRingFlowerColor with smart color balancing
     //% block
-    //% group="Set Ring - - Color Flower"
+    //% group="Set Ring - - - Color Flower"
     export function setRingFlowerColor() {
         let color = newColorSensor();
 
@@ -345,7 +344,7 @@ namespace ElizaDolls {
 
         // Find dominant color with hysteresis
         const max = Math.max(Math.max(r, g), b);
-        const DOMINANCE_FACTOR = 0.15; // More aggressive suppression
+        const DOMINANCE_FACTOR = 0.5; // More aggressive suppression
         const IS_DOMINANT = (channel: number) => channel > max * 0.7; // 70% threshold
 
         if (IS_DOMINANT(r)) {

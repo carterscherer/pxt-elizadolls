@@ -301,7 +301,13 @@ namespace ElizaDolls {
 
         basic.pause(50); // Short delay between readings
 
-        return { red, green, blue, white };
+        // Apply cool white compensation and noise floor
+        return {
+            red: Math.max(MIN_COLOR_THRESHOLD, red * COOL_WHITE_COMPENSATION.red),
+            green: Math.max(MIN_COLOR_THRESHOLD, green * COOL_WHITE_COMPENSATION.green),
+            blue: Math.max(MIN_COLOR_THRESHOLD, blue * COOL_WHITE_COMPENSATION.blue),
+            white
+        };
     }
 
     // Update the LED_BRIGHTNESS if needed (now correctly scaled)
@@ -317,37 +323,49 @@ namespace ElizaDolls {
         return Math.round(scaled);
     }
 
+    // Add these compensation factors at the top
+    const COOL_WHITE_COMPENSATION = { red: 1.1, green: 1.0, blue: 0.85 }; // Reduce blue, boost red
+    const MIN_COLOR_THRESHOLD = 15; // Ignore values below this to avoid noise
+
+
+
+    // Enhanced setRingFlowerColor with smart color balancing
     //% block
-    //% group="Set Ring TO Color Flower"
+    //% group="Set Ring -- Color Flower"
     export function setRingFlowerColor() {
         let color = newColorSensor();
 
-        // Scale colors first with brightness control
-        let r = scaleColor(color.red);
-        let g = scaleColor(color.green);
-        let b = scaleColor(color.blue);
+        // Use white channel to normalize colors
+        const total = color.red + color.green + color.blue;
+        const whiteBalance = color.white / 3; // Average white component
 
-        // Find dominant color using nested Math.max for 3 values
+        let r = scaleColor(color.red * (whiteBalance / (color.red || 1)));
+        let g = scaleColor(color.green * (whiteBalance / (color.green || 1)));
+        let b = scaleColor(color.blue * (whiteBalance / (color.blue || 1)));
+
+        // Find dominant color with hysteresis
         const max = Math.max(Math.max(r, g), b);
-        const DOMINANCE_FACTOR = 0.1;
+        const DOMINANCE_FACTOR = 0.15; // More aggressive suppression
+        const IS_DOMINANT = (channel: number) => channel > max * 0.7; // 70% threshold
 
-        if (max === r) {              // Red is dominant
-            g = Math.round(g * DOMINANCE_FACTOR);
-            b = Math.round(b * DOMINANCE_FACTOR);
-        } else if (max === g) {       // Green is dominant
-            r = Math.round(r * DOMINANCE_FACTOR);
-            b = Math.round(b * DOMINANCE_FACTOR);
-        } else {                      // Blue is dominant
-            r = Math.round(r * DOMINANCE_FACTOR);
-            g = Math.round(g * DOMINANCE_FACTOR);
+        if (IS_DOMINANT(r)) {
+            g *= DOMINANCE_FACTOR;
+            b *= DOMINANCE_FACTOR;
+        } else if (IS_DOMINANT(g)) {
+            r *= DOMINANCE_FACTOR;
+            b *= DOMINANCE_FACTOR;
+        } else if (IS_DOMINANT(b)) {
+            r *= DOMINANCE_FACTOR;
+            g *= DOMINANCE_FACTOR;
         }
 
         // Create buffer with emphasized colors
         let n = pins.createBuffer(25 * 3);
+        const FINAL_SCALE = 1.2; // Final brightness boost
         for (let o = 0; o < 25; o++) {
-            n[o * 3 + 0] = g;  // Green channel
-            n[o * 3 + 1] = r;  // Red channel
-            n[o * 3 + 2] = b;  // Blue channel
+            n[o * 3 + 0] = Math.min(255, g * FINAL_SCALE);  // Green
+            n[o * 3 + 1] = Math.min(255, r * FINAL_SCALE);  // Red
+            n[o * 3 + 2] = Math.min(255, b * FINAL_SCALE);  // Blue
         }
 
         ws2812b.sendBuffer(n, DigitalPin.P8);

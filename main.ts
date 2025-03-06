@@ -318,7 +318,7 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Set Ring - Color Flower"
+    //% group="Set Ring TO Color Flower"
     export function setRingFlowerColor() {
         let color = newColorSensor();
 
@@ -329,7 +329,7 @@ namespace ElizaDolls {
 
         // Find dominant color using nested Math.max for 3 values
         const max = Math.max(Math.max(r, g), b);
-        const DOMINANCE_FACTOR = 0.25;
+        const DOMINANCE_FACTOR = 0.1;
 
         if (max === r) {              // Red is dominant
             g = Math.round(g * DOMINANCE_FACTOR);

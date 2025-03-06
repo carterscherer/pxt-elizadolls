@@ -240,7 +240,7 @@ namespace ElizaDolls {
     }
 
     //% block
-    //% group="Plant Happiness Carrot"
+    //% group="Plant Happiness - Carrot"
     export function soilMoistureRead(): number {
         const SOIL_SENSOR_ADDRESS = 0x36; // Default I2C address for the STEMMA Soil Sensor
         const TOUCH_BASE = 0x0F; // Base register for moisture
@@ -261,7 +261,7 @@ namespace ElizaDolls {
         let moistureLevel = (buffer[0] << 8) | buffer[1]; // Convert to 16-bit integer
 
         // Additional delay to prevent excessive I2C reads
-        pause(250);
+        pause(5000);
 
         return moistureLevel;
     }
@@ -319,12 +319,12 @@ namespace ElizaDolls {
         let scaled = Math.map(value, 0, 65535, 0, 255);
         scaled = Math.round(scaled * LED_BRIGHTNESS);
         // Optional gamma correction (uncomment if needed)
-        // scaled = Math.pow(scaled / 255, 2.8) * 255;
+        scaled = Math.pow(scaled / 255, 2.8) * 255;
         return Math.round(scaled);
     }
 
     // Add these compensation factors at the top
-    const COOL_WHITE_COMPENSATION = { red: 0.80, green: 1.0, blue: 0.90 }; // Reduce blue, boost red
+    const COOL_WHITE_COMPENSATION = { red: 0.80, green: 1.0, blue: 0.95 }; // Reduce blue, boost red
     const MIN_COLOR_THRESHOLD = 5; // Ignore values below this to avoid noise
 
 

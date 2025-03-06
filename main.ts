@@ -331,7 +331,7 @@ namespace ElizaDolls {
 
     // Enhanced setRingFlowerColor with smart color balancing
     //% block
-    //% group="Set Ring -- Color Flower"
+    //% group="Set Ring - Color Flower"
     export function setRingFlowerColor() {
         let color = newColorSensor();
 

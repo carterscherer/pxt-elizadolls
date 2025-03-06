@@ -324,14 +324,14 @@ namespace ElizaDolls {
     }
 
     // Add these compensation factors at the top
-    const COOL_WHITE_COMPENSATION = { red: 1.0, green: 1.0, blue: 0.95 }; // Reduce blue, boost red
+    const COOL_WHITE_COMPENSATION = { red: 0.90, green: 1.0, blue: 0.90 }; // Reduce blue, boost red
     const MIN_COLOR_THRESHOLD = 5; // Ignore values below this to avoid noise
 
 
 
     // Enhanced setRingFlowerColor with smart color balancing
     //% block
-    //% group="Set Ring - Color Flower"
+    //% group="Set Ring - - Color Flower"
     export function setRingFlowerColor() {
         let color = newColorSensor();
 

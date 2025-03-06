@@ -319,7 +319,7 @@ namespace ElizaDolls {
         let scaled = Math.map(value, 0, 65535, 0, 255);
         scaled = Math.round(scaled * LED_BRIGHTNESS);
         // Optional gamma correction (uncomment if needed)
-        scaled = Math.pow(scaled / 255, 2.8) * 255;
+        // scaled = Math.pow(scaled / 255, 2.8) * 255;
         return Math.round(scaled);
     }
 
@@ -330,7 +330,7 @@ namespace ElizaDolls {
 
     // Enhanced setRingFlowerColor with smart color balancing
     //% block
-    //% group="Set Ring - - Color Flower"
+    //% group="Set Ring - - - Color Flower"
     export function setRingFlowerColor() {
         let color = newColorSensor();
 

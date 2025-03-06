@@ -324,8 +324,8 @@ namespace ElizaDolls {
     }
 
     // Add these compensation factors at the top
-    const COOL_WHITE_COMPENSATION = { red: 1.1, green: 1.0, blue: 0.85 }; // Reduce blue, boost red
-    const MIN_COLOR_THRESHOLD = 15; // Ignore values below this to avoid noise
+    const COOL_WHITE_COMPENSATION = { red: 1.0, green: 1.0, blue: 0.95 }; // Reduce blue, boost red
+    const MIN_COLOR_THRESHOLD = 5; // Ignore values below this to avoid noise
 
 
 

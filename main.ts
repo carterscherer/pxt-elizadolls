@@ -266,9 +266,17 @@ namespace ElizaDolls {
         return moistureLevel;
     }
 
+    // Top-level configurations
+    const LED_BRIGHTNESS = 0.4; // Increased brightness headroom
+    const AMBIENT_COMPENSATION = { red: 0.9, green: 1.0, blue: 0.7 }; // Aggressive blue reduction
+    const DOMINANCE_FACTOR = 0.2; // Balanced suppression
+    const GAMMA = 2.4; // Stronger gamma correction for color purity
+
+    // Simplified color sensor reader (RGB only)
     //% block
     //% group="Read - Color Flower"
-    export function newColorSensor(): { red: number; green: number; blue: number; white: number } {
+    export function newColorSensor(): { red: number; green: number; blue: number } {
+        // ... (keep existing I2C setup code) ...
         const COLOR_SENSOR_ADDRESS = 0x10; // I2C address for VEML6040
         const CONFIG_REG = 0x00; // Configuration register
         const RED_REG = 0x08; // Register for red 
@@ -301,74 +309,62 @@ namespace ElizaDolls {
 
         basic.pause(50); // Short delay between readings
 
-        // Apply cool white compensation and noise floor
+        // Read only RGB channels
         return {
-            red: Math.max(MIN_COLOR_THRESHOLD, red * COOL_WHITE_COMPENSATION.red),
-            green: Math.max(MIN_COLOR_THRESHOLD, green * COOL_WHITE_COMPENSATION.green),
-            blue: Math.max(MIN_COLOR_THRESHOLD, blue * COOL_WHITE_COMPENSATION.blue),
-            white
+            red: Math.max(1, (readRegister(RED_REG) * AMBIENT_COMPENSATION.red)),
+            green: Math.max(1, (readRegister(GREEN_REG) * AMBIENT_COMPENSATION.green)),
+            blue: Math.max(1, (readRegister(BLUE_REG) * AMBIENT_COMPENSATION.blue))
         };
     }
 
-    // Update the LED_BRIGHTNESS if needed (now correctly scaled)
-    const LED_BRIGHTNESS = 0.3; // Now effective due to correct scaling
+    // Gamma-corrected scaling
+    function scaleColor(value: number, maxSensorValue = 65535): number {
+        // Normalize to 0-1 range
+        let normalized = value / maxSensorValue;
 
-    // Corrected scaleColor function with proper sensor range and optional gamma
-    function scaleColor(value: number): number {
-        // Map 16-bit sensor value (0-65535) to 0-255, then apply brightness
-        let scaled = Math.map(value, 0, 65535, 0, 255);
-        scaled = Math.round(scaled * LED_BRIGHTNESS);
-        // Optional gamma correction (uncomment if needed)
-        // scaled = Math.pow(scaled / 255, 2.8) * 255;
-        return Math.round(scaled);
+        // Apply gamma correction
+        let corrected = Math.pow(normalized, 1 / GAMMA);
+
+        // Scale to 0-255 with brightness adjustment
+        return Math.round(corrected * 255 * LED_BRIGHTNESS);
     }
 
-    // Add these compensation factors at the top
-    const COOL_WHITE_COMPENSATION = { red: 0.80, green: 1.0, blue: 0.95 }; // Reduce blue, boost red
-    const MIN_COLOR_THRESHOLD = 5; // Ignore values below this to avoid noise
-
-
-    // Enhanced setRingFlowerColor with smart color balancing
     //% block
-    //% group="Set Ring - - - Color Flower"
+    //% group="Set Ring Color"
     export function setRingFlowerColor() {
-        let color = newColorSensor();
+        const color = newColorSensor();
 
-        // Use white channel to normalize colors
+        // Find total light intensity
         const total = color.red + color.green + color.blue;
-        const whiteBalance = color.white / 3; // Average white component
 
-        let r = scaleColor(color.red * (whiteBalance / (color.red || 1)));
-        let g = scaleColor(color.green * (whiteBalance / (color.green || 1)));
-        let b = scaleColor(color.blue * (whiteBalance / (color.blue || 1)));
+        // Calculate relative strengths
+        const ratios = {
+            red: color.red / total,
+            green: color.green / total,
+            blue: color.blue / total
+        };
 
-        // Find dominant color with hysteresis
-        const max = Math.max(Math.max(r, g), b);
-        const DOMINANCE_FACTOR = 0.19; // More aggressive suppression
-        const IS_DOMINANT = (channel: number) => channel > max * 0.7; // 70% threshold
+        // Determine dominant channel
+        const dominant = Math.max(Math.max(ratios.red, ratios.green), ratios.blue);
 
-        if (IS_DOMINANT(r)) {
-            g *= DOMINANCE_FACTOR;
-            b *= DOMINANCE_FACTOR;
-        } else if (IS_DOMINANT(g)) {
-            r *= DOMINANCE_FACTOR;
-            b *= DOMINANCE_FACTOR;
-        } else if (IS_DOMINANT(b)) {
-            r *= DOMINANCE_FACTOR;
-            g *= DOMINANCE_FACTOR;
+        // Apply scaling with dominance emphasis
+        let r = scaleColor(color.red * (ratios.red / dominant));
+        let g = scaleColor(color.green * (ratios.green / dominant));
+        let b = scaleColor(color.blue * (ratios.blue / dominant));
+
+        // Create LED buffer
+        let buffer = pins.createBuffer(25 * 3);
+        for (let i = 0; i < 25; i++) {
+            buffer[i * 3 + 0] = g;  // Green
+            buffer[i * 3 + 1] = r;  // Red
+            buffer[i * 3 + 2] = b;  // Blue
         }
 
-        // Create buffer with emphasized colors
-        let n = pins.createBuffer(25 * 3);
-        const FINAL_SCALE = 1.2; // Final brightness boost
-        for (let o = 0; o < 25; o++) {
-            n[o * 3 + 0] = Math.min(255, g * FINAL_SCALE);  // Green
-            n[o * 3 + 1] = Math.min(255, r * FINAL_SCALE);  // Red
-            n[o * 3 + 2] = Math.min(255, b * FINAL_SCALE);  // Blue
-        }
-
-        ws2812b.sendBuffer(n, DigitalPin.P8);
+        ws2812b.sendBuffer(buffer, DigitalPin.P8);
     }
+
+
+    
     //% block
     //% group="A0 Soil Moisture"
     // export function soilMoisture(): number {

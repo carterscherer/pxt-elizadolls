@@ -253,6 +253,7 @@ namespace ElizaDolls {
         ws2812b.sendBuffer(g, DigitalPin.P8);
     }
 
+    
     // Function to convert HSV to RGB
     function hsvToRgb(h: number, s: number, v: number): [number, number, number] {
         let c = v * s;

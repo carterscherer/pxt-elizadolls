@@ -330,8 +330,8 @@ namespace ElizaDolls {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C O L O R - F L O W E R
 
     // Top-level configurations
-    const LED_BRIGHTNESS = 0.25; // Increased brightness headroom
-    const GAMMA = 2.2; // Stronger gamma correction for color purity
+    const LED_BRIGHTNESS = 0.4; // Increased brightness headroom
+    const GAMMA = 2.5; // Stronger gamma correction for color purity
 
     // Simplified color sensor reader (RGB only)
     //% block
@@ -393,12 +393,12 @@ namespace ElizaDolls {
     //% group="Set Earring Color"
     export function lightUpEarings() {
         const color = newColorSensor();
-    
+
         // Apply scaling to sensor values
         let r = scaleColor(color.red);
         let g = scaleColor(color.green);
         let b = scaleColor(color.blue);
-    
+
         // Create LED buffer
         let f = pins.createBuffer(12 * 3);
         for (let j = 0; j < 12; j++) {
@@ -406,7 +406,7 @@ namespace ElizaDolls {
             f[j * 3 + 1] = r;  // Red
             f[j * 3 + 2] = b;  // Blue
         }
-    
+
         // Send buffer to the accessory LEDs
         ws2812b.sendBuffer(f, DigitalPin.P16);
     }

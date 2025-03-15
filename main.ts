@@ -330,18 +330,18 @@ namespace ElizaDolls {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C O L O R - F L O W E R
 
     // Top-level configurations
-    const LED_BRIGHTNESS = 0.4; // Increased brightness headroom
-    const GAMMA = 2.4; // Stronger gamma correction for color purity
-    
+    const LED_BRIGHTNESS = 0.25; // Increased brightness headroom
+    const GAMMA = 2.2; // Stronger gamma correction for color purity
+
     // Simplified color sensor reader (RGB only)
     //% block
-    //% group="Read - Color Flower"
+    //% group="READ - Color Flower"
     export function newColorSensor(): { red: number; green: number; blue: number } {
         const COLOR_SENSOR_ADDRESS = 0x10; // I2C address for VEML6040
         const RED_REG = 0x08; // Register for red 
         const GREEN_REG = 0x09; // Register for green 
         const BLUE_REG = 0x0A; // Register for blue 
-    
+
         function readRegister(register: number): number {
             let buffer = pins.createBuffer(1);
             buffer[0] = register;
@@ -350,31 +350,31 @@ namespace ElizaDolls {
             buffer = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
             return (buffer[0] << 8) | buffer[1];
         }
-    
+
         return {
             red: readRegister(RED_REG),
             green: readRegister(GREEN_REG),
             blue: readRegister(BLUE_REG)
         };
     }
-    
-    // Gamma-corrected scaling
+
+// Improved scaling function
     function scaleColor(value: number, maxSensorValue = 65535): number {
-        let normalized = value / maxSensorValue;
-        let corrected = Math.pow(normalized, 1 / GAMMA);
-        return Math.round(corrected * 255 * LED_BRIGHTNESS);
+        let normalized = value / maxSensorValue; // Normalize to 0-1 range
+        let corrected = Math.pow(normalized, 1 / GAMMA); // Apply gamma correction
+        return Math.round(corrected * 255 * LED_BRIGHTNESS); // Scale to 0-255
     }
-    
+
     //% block
     //% group="Set Ring Color"
     export function setRingFlowerColor() {
         const color = newColorSensor();
-    
-        // Apply gamma correction and brightness scaling
+
+        // Apply scaling to sensor values
         let r = scaleColor(color.red);
         let g = scaleColor(color.green);
         let b = scaleColor(color.blue);
-    
+
         // Create LED buffer
         let buffer = pins.createBuffer(25 * 3);
         for (let i = 0; i < 25; i++) {
@@ -382,7 +382,7 @@ namespace ElizaDolls {
             buffer[i * 3 + 1] = r;  // Red
             buffer[i * 3 + 2] = b;  // Blue
         }
-    
+
         ws2812b.sendBuffer(buffer, DigitalPin.P8);
     }
 

@@ -387,8 +387,29 @@ namespace ElizaDolls {
     }
 
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C O L O R - F L O W E R
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C O L O R - F L O W E R -  E A R I N G S
 
+    //% block
+    //% group="Set Earring Color"
+    export function lightUpEarings() {
+        const color = newColorSensor();
+    
+        // Apply scaling to sensor values
+        let r = scaleColor(color.red);
+        let g = scaleColor(color.green);
+        let b = scaleColor(color.blue);
+    
+        // Create LED buffer
+        let f = pins.createBuffer(12 * 3);
+        for (let j = 0; j < 12; j++) {
+            f[j * 3 + 0] = g;  // Green
+            f[j * 3 + 1] = r;  // Red
+            f[j * 3 + 2] = b;  // Blue
+        }
+    
+        // Send buffer to the accessory LEDs
+        ws2812b.sendBuffer(f, DigitalPin.P16);
+    }
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - O T H E R

@@ -3,6 +3,9 @@ namespace ElizaDolls {
     // In case it gets lost from above (// then %) 
     //  % color="#FE99F8"
 
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - P U L S E  1
+
+
     let pulseMinLocal = 1024;
     let pulseMaxLocal = 0;
     let pulseLocal = 0;
@@ -50,6 +53,10 @@ namespace ElizaDolls {
         pulseSensorBpmBeat = beat;
         return pulseSensorBpmStore;
     }
+
+    
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - P U L S E  2
+
 
     //% block="read pulse wave"
     //% group="Pulse"
@@ -141,6 +148,10 @@ namespace ElizaDolls {
         ws2812b.sendBuffer(e, DigitalPin.P16);
     }
 
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - E A R I N G S
+
+
     //% block="set Accessory $accessory"
     //% group="Accessories"
     //% accessory.shadow="colorNumberPicker"
@@ -170,6 +181,8 @@ namespace ElizaDolls {
         ws2812b.sendBuffer(f, DigitalPin.P16);
     }
 
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - S E T  R I N G
+
 
     //% block="set ring led $cv"
     //% group="Ring"
@@ -189,6 +202,9 @@ namespace ElizaDolls {
         // ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
         ws2812b.sendBuffer(g, DigitalPin.P8);
     }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - R A I N B O W
+
 
     //% block="Animated Rainbow Ring $cv"
     //% group="Ring"
@@ -217,6 +233,44 @@ namespace ElizaDolls {
         }
     }
 
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - R A I N B O W - S I M P L E
+
+    //% block="A Rainbow Ring"
+    //% group="Ring"
+    export function A_Rainbow_RING() {
+        // Set up SPI for APA102 (mode 3, 4MHz frequency)
+        pins.spiFrequency(4000000);
+        pins.spiFormat(8, 3); // SPI mode 3
+
+        // Create start frame (4 bytes of 0x00)
+        let startFrame = pins.createBuffer(4);
+        startFrame.fill(0x00);
+
+        // Create LED data buffer (25 LEDs * 4 bytes each)
+        let ledData = pins.createBuffer(25 * 4);
+        for (let i = 0; i < 25; i++) {
+            // APA102 format: [Brightness, Blue, Green, Red]
+            ledData[i * 4] = 0xFF;    // Max brightness (0xE0 | 0x1F)
+            ledData[i * 4 + 1] = 0xFF; // Blue (full intensity)
+            ledData[i * 4 + 2] = 0x00; // Green (off)
+            ledData[i * 4 + 3] = 0x00; // Red (off)
+        }
+
+        // Create end frame (4 bytes of 0xFF)
+        let endFrame = pins.createBuffer(4);
+        endFrame.fill(0xFF);
+
+        // Combine all parts into one buffer
+        let buffer = pins.createBuffer(startFrame.length + ledData.length + endFrame.length);
+        buffer.write(0, startFrame);
+        buffer.write(startFrame.length, ledData);
+        buffer.write(startFrame.length + ledData.length, endFrame);
+
+        // Send the buffer via SPI
+        pins.spiWrite(buffer);
+    }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - D I S T A N C E
 
 
     //% block
@@ -238,6 +292,9 @@ namespace ElizaDolls {
 
         return Math.idiv(d, 58);
     }
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - S O I L
+
 
     //% block
     //% group="Plant Happiness - Carrot"
@@ -265,6 +322,9 @@ namespace ElizaDolls {
 
         return moistureLevel;
     }
+
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C O L O R - F L O W E R
 
     // Top-level configurations
     const LED_BRIGHTNESS = 0.4; // Increased brightness headroom
@@ -363,44 +423,12 @@ namespace ElizaDolls {
         ws2812b.sendBuffer(buffer, DigitalPin.P8);
     }
 
-
-    
-    //% block
-    //% group="A0 Soil Moisture"
-    // export function soilMoisture(): number {
-    //     let moistureLevel: number = 0;
-    //     // Read the analog value from the soil moisture sensor on AnalogPin.P0
-    //     moistureLevel = pins.analogReadPin(AnalogPin.P0);
-
-    //     return moistureLevel; // Return the current moisture level
-    // }
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C O L O R - F L O W E R
 
 
-        // const minValue = 0;   
-        // const maxValue = 1023; 
-        // const percentage = Math.map(moistureLevel, minValue, maxValue, 0, 100);
 
-        // // Return the moisture percentage
-        // return Math.constrain(percentage, 0, 100);
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - O T H E R
 
-    // //% block
-    // //% group="Digital Soil Moisture"
-    // export function soilMoistureDigital(): number {
-    //     // Read the analog value from the soil moisture sensor on AnalogPin.P1
-    //     const moistureLevel = pins.digitalReadPin(DigitalPin.P1);
-    //     const moistureLevelTwo = pins.digitalReadPin(DigitalPin.P2);
-
-    //     // Optionally, you can map the moisture level to a percentage (0-100%)
-    //     const minValue = 0;   // Adjust this based on your sensor's calibration for dry soil
-    //     const maxValue = 1023; // Adjust this based on your sensor's calibration for wet soil
-    //     const percentage = Math.map(moistureLevel, minValue, maxValue, 0, 100);
-
-    //     // Return the moisture percentage
-    //     return Math.constrain(percentage, 0, 100);
-    // }
-
-
-    // 
 
     let colorSensorConfigured: boolean = false;
     let colorSensorAddress: number = 0x39;

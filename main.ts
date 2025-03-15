@@ -235,40 +235,20 @@ namespace ElizaDolls {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - R A I N B O W - S I M P L E
 
-    //% block="A Rainbow Ring"
+    //% block="A BLUE Ring"
     //% group="Ring"
-    export function A_Rainbow_RING() {
-        // Set up SPI for APA102 (mode 3, 4MHz frequency)
-        pins.spiFrequency(4000000);
-        pins.spiFormat(8, 3); // SPI mode 3
+    export function A_BLUE_RING() {
+        let g = pins.createBuffer(25 * 3);
 
-        // Create start frame (4 bytes of 0x00)
-        let startFrame = pins.createBuffer(4);
-        startFrame.fill(0x00);
-
-        // Create LED data buffer (25 LEDs * 4 bytes each)
-        let ledData = pins.createBuffer(25 * 4);
-        for (let i = 0; i < 25; i++) {
-            // APA102 format: [Brightness, Blue, Green, Red]
-            ledData[i * 4] = 0xFF;    // Max brightness (0xE0 | 0x1F)
-            ledData[i * 4 + 1] = 0xFF; // Blue (full intensity)
-            ledData[i * 4 + 2] = 0x00; // Green (off)
-            ledData[i * 4 + 3] = 0x00; // Red (off)
+        for (let k = 0; k < 25; k++) {
+            g[k * 3 + 0] = 0;   // Green component
+            g[k * 3 + 1] = 0;   // Red component
+            g[k * 3 + 2] = 255; // Blue component
         }
 
-        // Create end frame (4 bytes of 0xFF)
-        let endFrame = pins.createBuffer(4);
-        endFrame.fill(0xFF);
-
-        // Combine all parts into one buffer
-        let buffer = pins.createBuffer(startFrame.length + ledData.length + endFrame.length);
-        buffer.write(0, startFrame);
-        buffer.write(startFrame.length, ledData);
-        buffer.write(startFrame.length + ledData.length, endFrame);
-
-        // Send the buffer via SPI
-        pins.spiWrite(buffer);
+        ws2812b.sendBuffer(g, DigitalPin.P8);
     }
+
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - D I S T A N C E
 

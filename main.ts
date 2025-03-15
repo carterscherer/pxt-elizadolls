@@ -253,7 +253,7 @@ namespace ElizaDolls {
         ws2812b.sendBuffer(g, DigitalPin.P8);
     }
 
-    
+
     // Function to convert HSV to RGB
     function hsvToRgb(h: number, s: number, v: number): [number, number, number] {
         let c = v * s;
@@ -331,90 +331,50 @@ namespace ElizaDolls {
 
     // Top-level configurations
     const LED_BRIGHTNESS = 0.4; // Increased brightness headroom
-    const AMBIENT_COMPENSATION = { red: 0.9, green: 1.0, blue: 0.7 }; // Aggressive blue reduction
-    const DOMINANCE_FACTOR = 0.2; // Balanced suppression
     const GAMMA = 2.4; // Stronger gamma correction for color purity
-
+    
     // Simplified color sensor reader (RGB only)
     //% block
     //% group="Read - Color Flower"
     export function newColorSensor(): { red: number; green: number; blue: number } {
-        // ... (keep existing I2C setup code) ...
         const COLOR_SENSOR_ADDRESS = 0x10; // I2C address for VEML6040
-        const CONFIG_REG = 0x00; // Configuration register
         const RED_REG = 0x08; // Register for red 
         const GREEN_REG = 0x09; // Register for green 
         const BLUE_REG = 0x0A; // Register for blue 
-        const WHITE_REG = 0x0B; // Register for white 
-
-        // Configure VEML6040: Power on, 80ms integration, 1x gain
-        let configBuffer = pins.createBuffer(3);
-        configBuffer[0] = CONFIG_REG; // Register address
-        configBuffer[1] = 0x00;      // High byte (no trigger)
-        configBuffer[2] = 0x01;      // Low byte: Power on, IT=80ms, Gain=1x
-        pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, configBuffer, false);
-        basic.pause(10); // Allow sensor initialization
-
+    
         function readRegister(register: number): number {
-            let buffer2 = pins.createBuffer(1);
-            buffer2[0] = register;
-            pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, buffer2, false);
+            let buffer = pins.createBuffer(1);
+            buffer[0] = register;
+            pins.i2cWriteBuffer(COLOR_SENSOR_ADDRESS, buffer, false);
             basic.pause(5); // Small delay before reading
-            buffer2 = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
-            // Correct byte order: MSB first (buffer[0] << 8) | buffer[1]
-            return (buffer2[0] << 8) | buffer2[1];
+            buffer = pins.i2cReadBuffer(COLOR_SENSOR_ADDRESS, 2, false);
+            return (buffer[0] << 8) | buffer[1];
         }
-
-        let red = readRegister(RED_REG);
-        let green = readRegister(GREEN_REG);
-        let blue = readRegister(BLUE_REG);
-        let white = readRegister(WHITE_REG);
-
-        basic.pause(50); // Short delay between readings
-
-        // Read only RGB channels
+    
         return {
-            red: Math.max(1, (readRegister(RED_REG) * AMBIENT_COMPENSATION.red)),
-            green: Math.max(1, (readRegister(GREEN_REG) * AMBIENT_COMPENSATION.green)),
-            blue: Math.max(1, (readRegister(BLUE_REG) * AMBIENT_COMPENSATION.blue))
+            red: readRegister(RED_REG),
+            green: readRegister(GREEN_REG),
+            blue: readRegister(BLUE_REG)
         };
     }
-
+    
     // Gamma-corrected scaling
     function scaleColor(value: number, maxSensorValue = 65535): number {
-        // Normalize to 0-1 range
         let normalized = value / maxSensorValue;
-
-        // Apply gamma correction
         let corrected = Math.pow(normalized, 1 / GAMMA);
-
-        // Scale to 0-255 with brightness adjustment
         return Math.round(corrected * 255 * LED_BRIGHTNESS);
     }
-
+    
     //% block
     //% group="Set Ring Color"
     export function setRingFlowerColor() {
         const color = newColorSensor();
-
-        // Find total light intensity
-        const total = color.red + color.green + color.blue;
-
-        // Calculate relative strengths
-        const ratios = {
-            red: color.red / total,
-            green: color.green / total,
-            blue: color.blue / total
-        };
-
-        // Determine dominant channel
-        const dominant = Math.max(Math.max(ratios.red, ratios.green), ratios.blue);
-
-        // Apply scaling with dominance emphasis
-        let r = scaleColor(color.red * (ratios.red / dominant));
-        let g = scaleColor(color.green * (ratios.green / dominant));
-        let b = scaleColor(color.blue * (ratios.blue / dominant));
-
+    
+        // Apply gamma correction and brightness scaling
+        let r = scaleColor(color.red);
+        let g = scaleColor(color.green);
+        let b = scaleColor(color.blue);
+    
         // Create LED buffer
         let buffer = pins.createBuffer(25 * 3);
         for (let i = 0; i < 25; i++) {
@@ -422,9 +382,10 @@ namespace ElizaDolls {
             buffer[i * 3 + 1] = r;  // Red
             buffer[i * 3 + 2] = b;  // Blue
         }
-
+    
         ws2812b.sendBuffer(buffer, DigitalPin.P8);
     }
+
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C O L O R - F L O W E R
 

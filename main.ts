@@ -235,7 +235,7 @@ namespace ElizaDolls {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - R A I N B O W - S I M P L E
 
-    //% block="A Rainbow Ring"
+    //% block="A RAINBOW Ring"
     //% group="Ring"
     //% cv.shadow="colorNumberPicker"
     export function A_RAINBOW_RING() {
